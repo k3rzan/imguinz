@@ -135,7 +135,7 @@ pub export fn setupFonts(font_path: ?[]const u8) ?*ig.ImFont {
 			    config,
 			    null,
 			);
-			std.debug.print("\n==== Found FontPath: [{s}]\n", .{fontPath});
+			std.debug.print("\n==== Found FontPath: [{s}]\n", .{path});
 		    }
 	    }
     } else {
