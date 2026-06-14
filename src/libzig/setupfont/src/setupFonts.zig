@@ -106,13 +106,13 @@ fn point2px(point: f32) f32 {
 var config: *ig.ImFontConfig = undefined;
 
 /// Setup fonts for ImGui
-pub export fn setupFonts(font_path: ?[]const u8) ?*ig.ImFont {
+pub export fn setupFonts(font_path: ?[*:0]const u8) ?*ig.ImFont {
     const pio = ig.igGetIO_Nil();
     var font: ?*ig.ImFont = null;
     config = ig.ImFontConfig_ImFontConfig() orelse return null;
 
     if (font_path) |path| {
-		if (getWinFontPath(&sBufFontPath, path)) |fontPath| {
+		if (getWinFontPath(&sBufFontPath, std.mem.span(path))) |fontPath| {
 		    if (existsFile(fontPath)) {
 			font = ig.ImFontAtlas_AddFontFromFileTTF(
 			    pio.*.Fonts,
@@ -127,10 +127,11 @@ pub export fn setupFonts(font_path: ?[]const u8) ?*ig.ImFont {
 
 	    // If not found, try Linux fonts
 	    if (font == null) {
-		    if (existsFile(path)) {
+		    const fontPath = std.mem.span(path);
+		    if (existsFile(fontPath)) {
 			font = ig.ImFontAtlas_AddFontFromFileTTF(
 			    pio.*.Fonts,
-			    path.ptr,
+			    fontPath.ptr,
 			    point2px(13.0),
 			    config,
 			    null,
