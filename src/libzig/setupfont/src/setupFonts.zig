@@ -55,8 +55,8 @@ fn existsFile(path: []const u8) bool {
         const cwd_dir = std.fs.cwd();
         const file = cwd_dir.openFile(path, .{}) catch return false;
         defer file.close();
-    return true;
-}
+        return true;
+    }
 }
 
 /// Get Windows font path
@@ -91,7 +91,7 @@ fn getWinFontPath(buf: []u8, font_name: []const u8) ?[]const u8 {
             .{ win_dir, font_name },
         ) catch return null;
 
-    return result;
+        return result;
     } else {
         // For Zig 0.15.2, result is already created
         return win_dir;
@@ -110,38 +110,70 @@ pub export fn setupFonts() ?*ig.ImFont {
     const pio = ig.igGetIO_Nil();
     var font: ?*ig.ImFont = null;
     config = ig.ImFontConfig_ImFontConfig() orelse return null;
-    // Try Windows fonts
-    for (WinFontNameTbl) |fontName| {
-        if (getWinFontPath(&sBufFontPath, fontName)) |fontPath| {
-            if (existsFile(fontPath)) {
-                font = ig.ImFontAtlas_AddFontFromFileTTF(
-                    pio.*.Fonts,
-                    fontPath.ptr,
-                    point2px(14.5),
-                    config,
-                    null,
-                );
-                std.debug.print("\n==== Found FontPath: [{s}]\n", .{fontPath});
-                break;
-            }
-        }
-    }
 
-    // If not found, try Linux fonts
-    if (font == null) {
-        for (LinuxFontNameTbl) |fontPath| {
-            if (existsFile(fontPath)) {
-                font = ig.ImFontAtlas_AddFontFromFileTTF(
-                    pio.*.Fonts,
-                    fontPath.ptr,
-                    point2px(13.0),
-                    config,
-                    null,
-                );
-                std.debug.print("\n==== Found FontPath: [{s}]\n", .{fontPath});
-                break;
-            }
-        }
+    if (font_path) |path| {
+		if (getWinFontPath(&sBufFontPath, path)) |fontPath| {
+		    if (existsFile(fontPath)) {
+			font = ig.ImFontAtlas_AddFontFromFileTTF(
+			    pio.*.Fonts,
+			    fontPath.ptr,
+			    point2px(14.5),
+			    config,
+			    null,
+			);
+			std.debug.print("\n==== Found FontPath: [{s}]\n", .{fontPath});
+			break;
+		    }
+		}
+
+	    // If not found, try Linux fonts
+	    if (font == null) {
+		    if (existsFile(path)) {
+			font = ig.ImFontAtlas_AddFontFromFileTTF(
+			    pio.*.Fonts,
+			    path.ptr,
+			    point2px(13.0),
+			    config,
+			    null,
+			);
+			std.debug.print("\n==== Found FontPath: [{s}]\n", .{fontPath});
+			break;
+		    }
+	    }
+    } else {
+    // Try Windows fonts
+	    for (WinFontNameTbl) |fontName| {
+		if (getWinFontPath(&sBufFontPath, fontName)) |fontPath| {
+		    if (existsFile(fontPath)) {
+			font = ig.ImFontAtlas_AddFontFromFileTTF(
+			    pio.*.Fonts,
+			    fontPath.ptr,
+			    point2px(14.5),
+			    config,
+			    null,
+			);
+			std.debug.print("\n==== Found FontPath: [{s}]\n", .{fontPath});
+			break;
+		    }
+		}
+	    }
+
+	    // If not found, try Linux fonts
+	    if (font == null) {
+		for (LinuxFontNameTbl) |fontPath| {
+		    if (existsFile(fontPath)) {
+			font = ig.ImFontAtlas_AddFontFromFileTTF(
+			    pio.*.Fonts,
+			    fontPath.ptr,
+			    point2px(13.0),
+			    config,
+			    null,
+			);
+			std.debug.print("\n==== Found FontPath: [{s}]\n", .{fontPath});
+			break;
+		    }
+		}
+	    }
     }
 
     // If still not found, use default
