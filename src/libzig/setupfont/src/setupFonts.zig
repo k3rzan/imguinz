@@ -106,7 +106,7 @@ fn point2px(point: f32) f32 {
 var config: *ig.ImFontConfig = undefined;
 
 /// Setup fonts for ImGui
-pub export fn setupFonts(font_path: []const u8) ?*ig.ImFont {
+pub export fn setupFonts(font_path: ?[]const u8) ?*ig.ImFont {
     const pio = ig.igGetIO_Nil();
     var font: ?*ig.ImFont = null;
     config = ig.ImFontConfig_ImFontConfig() orelse return null;
